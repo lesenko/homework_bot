@@ -4,7 +4,6 @@ import sys
 import time
 
 import requests
-from requests.exceptions import HTTPError
 from dotenv import load_dotenv
 from telegram import Bot
 
@@ -40,6 +39,7 @@ formatter = logging.Formatter(
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
+
 def send_message(bot, message):
     """Функция для отправки сообщений."""
     try:
@@ -49,6 +49,7 @@ def send_message(bot, message):
     except Exception as error:
         logger.error(f'Сбой при отправке сообщения: {error}')
 
+
 def get_api_answer(current_timestamp):
     """Делаем запрос к API Практикума."""
     timestamp = current_timestamp or int(time.time())
@@ -56,29 +57,31 @@ def get_api_answer(current_timestamp):
     try:
         api_answer = requests.get(
             ENDPOINT, headers=HEADERS, params=params
-        )      
+        )
     except Exception as error:
         logger.error(f'Ошибка при запросе к основному API: {error}')
     if api_answer.status_code != 200:
         logger.error('Ошибка статуса страницы.')
-        raise Exception 
+        raise Exception
     return api_answer.json()
+
 
 def check_response(response):
     """Проверяем ответ API на корректность."""
     if not isinstance(response, dict):
         logger.error('В ответе не словарь.')
-        raise TypeError ('В ответе не словарь.')
+        raise TypeError('В ответе не словарь.')
     if len(response) == 0:
         logger.error('Словарь пустой.')
-        raise IndexError ('Словарь пустой.')
+        raise IndexError('Словарь пустой.')
     if 'homeworks' not in response.keys():
         logger.error('В словаре нет ключа homeworks.')
-        raise KeyError ('В словаре нет ключа homeworks.')
+        raise KeyError('В словаре нет ключа homeworks.')
     if not isinstance(response.get('homeworks'), list):
         logger.error('Домашние работы указаны не в виде списка.')
-        raise TypeError ('Домашние работы указаны не в виде списка.')
+        raise TypeError('Домашние работы указаны не в виде списка.')
     return response.get('homeworks')
+
 
 def parse_status(homework):
     """Получаем статус домашней работы."""
@@ -96,6 +99,7 @@ def parse_status(homework):
     verdict = HOMEWORK_STATUSES.get(homework_status)
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
+
 def check_tokens():
     """Проверяем доступность переменных окружения."""
     try:
@@ -105,6 +109,7 @@ def check_tokens():
             return False
     except KeyError:
         logger.critical(f'Отсутствуют переменные окружения: {KeyError}.')
+
 
 def main():
     """Основная логика работы бота."""
