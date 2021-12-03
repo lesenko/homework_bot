@@ -2,12 +2,11 @@ import logging
 import os
 import sys
 import time
+from http import HTTPStatus
 
 import requests
 from dotenv import load_dotenv
-from requests.api import get
 from telegram import Bot
-from http import HTTPStatus
 
 load_dotenv()
 
@@ -46,7 +45,7 @@ def send_message(bot, message):
     """Функция для отправки сообщений."""
     try:
         bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
-        logger.info(f'Удачная отправка сообщения.')
+        logger.info('Удачная отправка сообщения.')
     except Exception as error:
         logger.error(f'Сбой при отправке сообщения: {error}')
 
@@ -67,7 +66,7 @@ def get_api_answer(current_timestamp):
     try:
         return api_answer.json()
     except TypeError as error:
-        logger.error('Возвращаемый объект не соответствует типу.')
+        logger.error(f'Возвращаемый объект не соответствует типу: {error}.')
 
 
 def check_response(response):
