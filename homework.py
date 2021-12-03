@@ -5,7 +5,9 @@ import time
 
 import requests
 from dotenv import load_dotenv
+from requests.api import get
 from telegram import Bot
+from http import HTTPStatus
 
 load_dotenv()
 
@@ -43,9 +45,8 @@ logger.addHandler(handler)
 def send_message(bot, message):
     """Функция для отправки сообщений."""
     try:
-        bot = Bot(token=TELEGRAM_TOKEN)
         bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
-        logging.info(f'Удачная отправка сообщения: {logging.info}')
+        logger.info(f'Удачная отправка сообщения.')
     except Exception as error:
         logger.error(f'Сбой при отправке сообщения: {error}')
 
@@ -60,10 +61,13 @@ def get_api_answer(current_timestamp):
         )
     except Exception as error:
         logger.error(f'Ошибка при запросе к основному API: {error}')
-    if api_answer.status_code != 200:
+    if api_answer.status_code != HTTPStatus.OK:
         logger.error('Ошибка статуса страницы.')
         raise Exception
-    return api_answer.json()
+    try:
+        return api_answer.json()
+    except TypeError as error:
+        logger.error('Возвращаемый объект не соответствует типу.')
 
 
 def check_response(response):
@@ -74,23 +78,27 @@ def check_response(response):
     if len(response) == 0:
         logger.error('Словарь пустой.')
         raise IndexError('Словарь пустой.')
-    if 'homeworks' not in response.keys():
+    if 'homeworks' not in response:
         logger.error('В словаре нет ключа homeworks.')
         raise KeyError('В словаре нет ключа homeworks.')
-    if not isinstance(response.get('homeworks'), list):
+    homeworks_list = response.get('homeworks')
+    if not isinstance(homeworks_list, list):
         logger.error('Домашние работы указаны не в виде списка.')
         raise TypeError('Домашние работы указаны не в виде списка.')
-    return response.get('homeworks')
+    if len(homeworks_list) == 0:
+        logger.error('Нет данных о домашних работах.')
+        raise IndexError('Нет данных о домашних работах.')
+    return homeworks_list
 
 
 def parse_status(homework):
     """Получаем статус домашней работы."""
     try:
-        homework_name = homework.get('homework_name')
+        homework_name = homework['homework_name']
     except KeyError as error:
         logger.error(f'Не найден ключ homework_name: {error}')
     try:
-        homework_status = homework.get('status')
+        homework_status = homework['status']
     except KeyError as error:
         logger.error(f'Не найден ключ homework_status: {error}')
     if homework_status not in HOMEWORK_STATUSES:
@@ -103,12 +111,10 @@ def parse_status(homework):
 def check_tokens():
     """Проверяем доступность переменных окружения."""
     try:
-        if PRACTICUM_TOKEN or TELEGRAM_TOKEN or TELEGRAM_CHAT_ID:
-            return True
-        else:
-            return False
-    except KeyError:
-        logger.critical(f'Отсутствуют переменные окружения: {KeyError}.')
+        return PRACTICUM_TOKEN or TELEGRAM_TOKEN or TELEGRAM_CHAT_ID
+    except NameError as error:
+        logger.critical(f'Отсутствуют переменные окружения: {error}.')
+        return False
 
 
 def main():
