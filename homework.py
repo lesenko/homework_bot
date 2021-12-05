@@ -3,7 +3,6 @@ import os
 import sys
 import time
 from http import HTTPStatus
-from typing import NoReturn
 
 import requests
 from dotenv import load_dotenv
@@ -95,12 +94,12 @@ def parse_status(homework):
     """Получаем статус домашней работы."""
     try:
         homework_name = homework['homework_name']
-    except KeyError as error: 
+    except KeyError as error:
         logger.error(f'Не найден ключ homework_name: {error}')
-    try: 
+    try:
         homework_status = homework['status']
-    except KeyError as error: 
-        logger.error(f'Не найден ключ homework_status: {error}') 
+    except KeyError as error:
+        logger.error(f'Не найден ключ homework_status: {error}')
     if homework['status'] not in HOMEWORK_STATUSES:
         logger.error('Такого статуса нет в словаре.')
         raise KeyError
