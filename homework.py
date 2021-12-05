@@ -3,6 +3,7 @@ import os
 import sys
 import time
 from http import HTTPStatus
+from typing import NoReturn
 
 import requests
 from dotenv import load_dotenv
@@ -94,24 +95,25 @@ def parse_status(homework):
     """Получаем статус домашней работы."""
     try:
         homework_name = homework['homework_name']
-    except KeyError as error:
+    except KeyError as error: 
         logger.error(f'Не найден ключ homework_name: {error}')
-    try:
+    try: 
         homework_status = homework['status']
-    except KeyError as error:
-        logger.error(f'Не найден ключ homework_status: {error}')
-    if homework_status not in HOMEWORK_STATUSES:
+    except KeyError as error: 
+        logger.error(f'Не найден ключ homework_status: {error}') 
+    if homework['status'] not in HOMEWORK_STATUSES:
         logger.error('Такого статуса нет в словаре.')
-        raise KeyError('Такого статуса нет в словаре.')
-    verdict = HOMEWORK_STATUSES.get(homework_status)
-    return f'Изменился статус проверки работы "{homework_name}". {verdict}'
+        raise KeyError
+    else:
+        verdict = HOMEWORK_STATUSES.get(homework_status)
+        return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
 def check_tokens():
     """Проверяем доступность переменных окружения."""
     try:
         return PRACTICUM_TOKEN or TELEGRAM_TOKEN or TELEGRAM_CHAT_ID
-    except NameError as error:
+    except UnboundLocalError as error:
         logger.critical(f'Отсутствуют переменные окружения: {error}.')
         return False
 
