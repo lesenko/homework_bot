@@ -92,29 +92,22 @@ def check_response(response):
 
 def parse_status(homework):
     """Получаем статус домашней работы."""
-    try:
-        homework_name = homework['homework_name']
-    except KeyError as error:
-        logger.error(f'Не найден ключ homework_name: {error}')
-    try:
-        homework_status = homework['status']
-    except KeyError as error:
-        logger.error(f'Не найден ключ homework_status: {error}')
-    if homework['status'] not in HOMEWORK_STATUSES:
+    homework_name = homework['homework_name']
+    homework_status = homework['status']
+    if homework_name not in homework:
+        logger.error('Не найден ключ homework_name.')
+    if homework_status not in homework:
+        logger.error('Не найден ключ homework_status.')
+    if homework_status not in HOMEWORK_STATUSES:
         logger.error('Такого статуса нет в словаре.')
-        raise KeyError
-    else:
-        verdict = HOMEWORK_STATUSES.get(homework_status)
-        return f'Изменился статус проверки работы "{homework_name}". {verdict}'
+        raise KeyError('Такого статуса нет в словаре.')
+    verdict = HOMEWORK_STATUSES.get(homework_status)
+    return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
 def check_tokens():
     """Проверяем доступность переменных окружения."""
-    try:
-        return PRACTICUM_TOKEN or TELEGRAM_TOKEN or TELEGRAM_CHAT_ID
-    except UnboundLocalError as error:
-        logger.critical(f'Отсутствуют переменные окружения: {error}.')
-        return False
+    return PRACTICUM_TOKEN or TELEGRAM_TOKEN or TELEGRAM_CHAT_ID
 
 
 def main():
