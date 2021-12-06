@@ -94,10 +94,12 @@ def parse_status(homework):
     """Получаем статус домашней работы."""
     homework_name = homework['homework_name']
     homework_status = homework['status']
-    if homework_name not in homework:
+    if homework_name is None:
         logger.error('Не найден ключ homework_name.')
-    if homework_status not in homework:
+        raise KeyError('Не найден ключ homework_name.')
+    if homework_status is None:
         logger.error('Не найден ключ homework_status.')
+        raise KeyError('Не найден ключ homework_status.')
     if homework_status not in HOMEWORK_STATUSES:
         logger.error('Такого статуса нет в словаре.')
         raise KeyError('Такого статуса нет в словаре.')
